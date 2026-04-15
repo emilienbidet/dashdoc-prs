@@ -7,7 +7,7 @@
 - ✅ `server/effect/runtime.ts` — `appLayer(env)`, `makeRuntime(bindings)` via `ManagedRuntime`, `runPromise()` helper.
 - ✅ Schemas (`Pr`, `Review`, `CheckRun`, `Tag`, `Commit`) + `GithubClient` service (search, getPr, reviews, check-runs, matching-refs, branch commits). Uses `effect/Schema` (`@effect/schema` removed — it's now in `effect` core). Retry on 429/5xx with exponential backoff. ETag caching deferred to after `D1Store` lands.
 - 🔀 **Plan refinement — production signal**: the promote workflow force-pushes to the `gitbook` branch on prod-eu success (`promote-dashdoc.yml:427-428`). So the production check is *"PR's `merge_commit_sha` is in the ancestry of `gitbook`"* — cheaper than inspecting workflow inputs (which GitHub REST doesn't expose). Implemented as `listBranchCommits("gitbook", 500)` → `Set<sha>` membership.
-- ⏳ Pending — `server/services/D1Store.ts`
+- ✅ `server/services/D1Store.ts` — `upsertPrs` (batched), `listPrs` (grouped by column, already sorted), `pruneBeyondWindow`, `getMeta`/`putMeta`. Also `server/schemas/BoardRow.ts` (the canonical shape shared between server and client).
 - ⏳ Pending — `lib/column.ts` + `lib/reviewState.ts` + `lib/ciState.ts` + `lib/time.ts`
 - ⏳ Pending — `server/services/PrSync.ts`
 - ⏳ Pending — `src/worker-entry.ts` (scheduled handler)
