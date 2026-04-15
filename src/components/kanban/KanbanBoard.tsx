@@ -1,4 +1,5 @@
 import { Result, useAtomSet, useAtomValue } from "@effect-atom/atom-react"
+import { Option } from "effect"
 import { useEffect } from "react"
 import { boardAtom } from "#/atoms/prs.ts"
 import { kickSyncAtom } from "#/atoms/sync.ts"
@@ -22,14 +23,26 @@ export function KanbanBoard() {
 
 	return Result.match(result, {
 		onInitial: () => <BoardSkeleton />,
-		onFailure: (f) => <BoardError message={String(f.cause)} />,
+		onFailure: (f) =>
+			// Transient fetch/decode blip: keep last-good data on screen and a
+			// small stale indicator. Only go to the error panel if we never
+			// had a successful load.
+			Option.match(f.previousSuccess, {
+				onNone: () => <BoardError message={String(f.cause)} />,
+				onSome: (s) => <BoardGrid data={s.value} stale />,
+			}),
 		onSuccess: (s) => <BoardGrid data={s.value} />,
 	})
 }
 
-function BoardGrid({ data }: { data: BoardData }) {
+function BoardGrid({ data, stale = false }: { data: BoardData; stale?: boolean }) {
 	return (
-		<div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+		<div
+			className={`grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 ${
+				stale ? "opacity-80" : ""
+			}`}
+			aria-busy={stale || undefined}
+		>
 			{COLUMNS.map((key) => (
 				<KanbanColumn key={key} columnKey={key} rows={data[key]} />
 			))}
