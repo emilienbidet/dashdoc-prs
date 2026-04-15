@@ -18,6 +18,12 @@
 - ⏳ Pending — `routes/board.tsx` + header link update
 - ⏳ Pending — Verification (D1 create, migrate, secret, dev test, deploy)
 
+## Frontend requirements
+
+- **Tailwind tokens only.** Use Tailwind v4's built-in color/spacing/radius scales (`slate`, `emerald`, `rose`, `amber`, `sky`, etc.) and any `@theme` tokens declared in `styles.css`. No hardcoded hex colors, no ad-hoc CSS variables inside components.
+- **No theme toggle / dark-mode switcher.** Rely on `prefers-color-scheme` if anything.
+- Keep each component small and single-purpose; no big "dashboard" files.
+
 ## Context
 
 You want a personal, "almost live" kanban board that shows *your* open and
