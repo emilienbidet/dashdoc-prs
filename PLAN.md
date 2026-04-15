@@ -17,7 +17,7 @@
 - ✅ Kanban UI. `ReviewBadge` + `CiBadge` (color via Tailwind palette only — emerald/rose/amber/slate), `RelativeTime` (self-ticks every 30 s), `PrCard` (title, #number, badges, relative time, deep link to the GitHub PR), `KanbanColumn` (sticky accented header, count pill, empty state), `KanbanBoard` (4-col grid, drives `Result.match` over `boardAtom`, fires `kickSyncAtom` on mount + visibility change).
 - ✅ `/board` route renders the real board. `/` → `/board`. SSR disabled on the board (client-only — atoms use `fetch`).
 - ✅ Dev verification via Chrome DevTools MCP. `/board` rendered end-to-end: 4 columns populated (Dev 33 / Merged 4 / Staging 3 / Production 55), accents correct, review + CI badges in place, relative times sensible, card links open GitHub PRs, zero console errors.
-- ⏳ Pending — Deploy (`wrangler deploy`) + confirm scheduled cron fires on `wrangler tail`.
+- ✅ Deployed. Live at https://dashdoc-prs.voila-dev.workers.dev (version `4636e401-29ef-4a61-8018-4fd5bfc9e044`). Worker bundle 1.42 MiB / gzip 294 KiB, startup 33 ms. Cron `*/1 * * * *` registered. Deployed `/board` rendered 33 / 5 / 3 / 54 rows as expected; `/api/prs` returned 45 KB of live data.
 
 ## Frontend requirements
 
