@@ -15,7 +15,6 @@
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.26.0",
     "@effect-atom/atom-react": "^0.5.0",
-    "@effect/schema": "^0.75.5",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-router": "latest",
