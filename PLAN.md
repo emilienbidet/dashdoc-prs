@@ -3,7 +3,8 @@
 ## Progress
 
 - ✅ Foundation — deps (`effect`, `@effect/schema`, `@effect-atom/atom-react`) installed, `wrangler.jsonc` updated (D1 binding, cron, vars, `main` → `src/worker-entry.ts`), `migrations/0001_init.sql` created. Next: user runs `wrangler d1 create dashdoc-prs` and pastes the `database_id` into `wrangler.jsonc`.
-- ⏳ Pending — `server/env.ts` + `server/effect/runtime.ts`
+- ✅ `server/env.ts` — `Env` Context.Tag + `AppEnv` interface + `fromBindings()` guard for missing `GITHUB_TOKEN`. Types driven by `wrangler types` → `worker-configuration.d.ts` (gitignored).
+- ✅ `server/effect/runtime.ts` — `appLayer(env)`, `makeRuntime(bindings)` via `ManagedRuntime`, `runPromise()` helper.
 - ⏳ Pending — `server/services/GithubClient.ts` + schemas
 - ⏳ Pending — `server/services/D1Store.ts`
 - ⏳ Pending — `lib/column.ts` + `lib/reviewState.ts` + `lib/ciState.ts` + `lib/time.ts`
