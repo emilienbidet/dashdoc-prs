@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@effect/vitest"
 import { Effect, Layer } from "effect"
 import { Env } from "../env.ts"
+import { EtagCacheNoop } from "./EtagCache.ts"
 import { GithubClient } from "./GithubClient.ts"
 
 const token = process.env.GITHUB_TOKEN
@@ -14,7 +15,10 @@ const envLayer = Layer.succeed(Env, {
 	GITHUB_USER: user,
 })
 
-const clientLayer = GithubClient.Default.pipe(Layer.provide(envLayer))
+const clientLayer = GithubClient.Default.pipe(
+	Layer.provide(EtagCacheNoop),
+	Layer.provide(envLayer),
+)
 
 const twoWeeksAgo = () => {
 	const d = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
