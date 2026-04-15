@@ -1,5 +1,20 @@
 # Kanban PR tracker for dashdoc/dashdoc (user: emilienbidet)
 
+## Progress
+
+- ✅ Foundation — deps (`effect`, `@effect/schema`, `@effect-atom/atom-react`) installed, `wrangler.jsonc` updated (D1 binding, cron, vars, `main` → `src/worker-entry.ts`), `migrations/0001_init.sql` created. Next: user runs `wrangler d1 create dashdoc-prs` and pastes the `database_id` into `wrangler.jsonc`.
+- ⏳ Pending — `server/env.ts` + `server/effect/runtime.ts`
+- ⏳ Pending — `server/services/GithubClient.ts` + schemas
+- ⏳ Pending — `server/services/D1Store.ts`
+- ⏳ Pending — `lib/column.ts` + `lib/reviewState.ts` + `lib/ciState.ts` + `lib/time.ts`
+- ⏳ Pending — `server/services/PrSync.ts`
+- ⏳ Pending — `src/worker-entry.ts` (scheduled handler)
+- ⏳ Pending — API routes `routes/api/prs.ts` + `routes/api/sync.ts`
+- ⏳ Pending — `atoms/runtime.ts` + `atoms/prs.ts` + `atoms/sync.ts`
+- ⏳ Pending — Kanban components (`KanbanBoard`, `KanbanColumn`, `PrCard`, `ReviewBadge`, `CiBadge`, `RelativeTime`)
+- ⏳ Pending — `routes/board.tsx` + header link update
+- ⏳ Pending — Verification (D1 create, migrate, secret, dev test, deploy)
+
 ## Context
 
 You want a personal, "almost live" kanban board that shows *your* open and

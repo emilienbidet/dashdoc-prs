@@ -3,5 +3,19 @@
   "name": "tanstack-start-app",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry"
+  "main": "src/worker-entry.ts",
+  "vars": {
+    "GITHUB_REPO": "dashdoc/dashdoc",
+    "GITHUB_USER": "emilienbidet"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dashdoc-prs",
+      "database_id": "REPLACE_WITH_D1_ID"
+    }
+  ],
+  "triggers": {
+    "crons": ["*/1 * * * *"]
+  }
 }
