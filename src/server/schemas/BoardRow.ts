@@ -16,6 +16,7 @@ export const BoardRow = Schema.Struct({
 	author: Schema.String,
 	state: Schema.Literal("open", "closed"),
 	merged: Schema.Boolean,
+	is_draft: Schema.Boolean,
 	merge_sha: Schema.NullOr(Schema.String),
 	head_sha: Schema.String,
 	created_at: Schema.String,

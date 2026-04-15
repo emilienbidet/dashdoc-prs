@@ -7,7 +7,16 @@ export class BoardFetchError extends Data.TaggedError("BoardFetchError")<{
 }> {}
 
 const fetchBoard = Effect.tryPromise({
-	try: () => fetch("/api/prs").then((r) => r.json()),
+	try: async () => {
+		const res = await fetch("/api/prs")
+		if (res.status === 401) {
+			// Cookie missing / expired — bounce to the login page and never
+			// resolve so the atom stays in its last state until we navigate.
+			if (typeof window !== "undefined") window.location.href = "/login"
+			return await new Promise<never>(() => {})
+		}
+		return await res.json()
+	},
 	catch: (cause) => new BoardFetchError({ cause }),
 }).pipe(
 	Effect.flatMap((json) =>

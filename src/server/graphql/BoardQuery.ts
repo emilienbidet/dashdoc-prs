@@ -15,6 +15,7 @@ query Board($q: String!) {
         url
         state
         merged
+        isDraft
         createdAt
         updatedAt
         mergedAt
@@ -67,6 +68,7 @@ export const BoardPr = Schema.Struct({
 	url: Schema.String,
 	state: Schema.Literal("OPEN", "CLOSED", "MERGED"),
 	merged: Schema.Boolean,
+	isDraft: Schema.Boolean,
 	createdAt: Schema.String,
 	updatedAt: Schema.String,
 	mergedAt: Schema.NullOr(Schema.String),

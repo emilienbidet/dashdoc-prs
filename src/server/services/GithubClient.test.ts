@@ -15,6 +15,7 @@ const envLayer = Layer.succeed(Env, {
 	GITHUB_TOKEN: token ?? "",
 	GITHUB_REPO: repo,
 	GITHUB_USER: user,
+	AUTH_PASSWORD: "test",
 })
 
 const restLayer = GithubClient.Default.pipe(

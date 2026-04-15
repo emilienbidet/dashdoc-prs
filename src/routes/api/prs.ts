@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { env } from "cloudflare:workers"
 import { Effect, Layer } from "effect"
+import { isAuthenticated } from "#/server/auth.ts"
 import { runPromise } from "#/server/effect/runtime.ts"
 import type { AppBindings } from "#/server/env.ts"
 import { D1Store } from "#/server/services/D1Store.ts"
@@ -13,14 +14,18 @@ const list = Effect.gen(function* () {
 export const Route = createFileRoute("/api/prs")({
 	server: {
 		handlers: {
-			GET: async () => {
+			GET: async ({ request }) => {
+				const e = env as AppBindings
+				if (!(await isAuthenticated(request, e.AUTH_PASSWORD))) {
+					return Response.json({ error: "unauthorized" }, { status: 401 })
+				}
 				try {
-					const data = await runPromise(env as AppBindings, list)
+					const data = await runPromise(e, list)
 					return Response.json(data, {
 						headers: { "cache-control": "no-store" },
 					})
-				} catch (e) {
-					return Response.json({ error: String(e) }, { status: 500 })
+				} catch (err) {
+					return Response.json({ error: String(err) }, { status: 500 })
 				}
 			},
 		},

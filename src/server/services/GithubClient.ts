@@ -72,6 +72,7 @@ const CompareResult = Schema.Struct({
 	status: Schema.Literal("ahead", "behind", "identical", "diverged"),
 	ahead_by: Schema.Number,
 	behind_by: Schema.Number,
+	commits: Schema.Array(Schema.Struct({ sha: Schema.String })),
 })
 
 export class GithubClient extends Effect.Service<GithubClient>()("GithubClient", {
@@ -110,6 +111,20 @@ export class GithubClient extends Effect.Service<GithubClient>()("GithubClient",
 				getJson(deps, CompareResult, `/repos/${repo}/compare/gitbook...${sha}`).pipe(
 					Effect.map(
 						(r) => (r.status === "identical" || r.status === "behind") && r.ahead_by === 0,
+					),
+				),
+
+			// Commits reachable from `ref` but not from gitbook. Returns [] when
+			// `ref` is not strictly ahead (identical/behind/diverged). Used to
+			// expand a staging tag into its set of "pending prod" commits.
+			commitsAheadOfGitbook: (ref: string) =>
+				getJson(
+					deps,
+					CompareResult,
+					`/repos/${repo}/compare/gitbook...${encodeURIComponent(ref)}`,
+				).pipe(
+					Effect.map((r) =>
+						r.status === "ahead" && r.behind_by === 0 ? r.commits.map((c) => c.sha) : [],
 					),
 				),
 		}

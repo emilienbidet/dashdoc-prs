@@ -1,3 +1,4 @@
 GITHUB_TOKEN=ghp_your_personal_access_token_here
 GITHUB_REPO=dashdoc/dashdoc
 GITHUB_USER=emilienbidet
+AUTH_PASSWORD=pick-a-password-for-the-web-ui

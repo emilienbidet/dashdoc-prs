@@ -10,13 +10,19 @@ import { D1Store } from "./D1Store.ts"
 import { GithubClient } from "./GithubClient.ts"
 import { GithubGraphql } from "./GithubGraphql.ts"
 
-const TAG_RE = /^refs\/tags\/dashdoc-([0-9a-f]{7,40})(?:$|-)/
+const TAG_PREFIX = "refs/tags/"
 
-export const parseStagingShorts = (refs: ReadonlyArray<MatchingRef>): Set<string> => {
-	const out = new Set<string>()
+// Candidate staging tags: dashdoc-* refs whose target sha isn't already part
+// of gitbook's recent window — anything still in that window is deployed.
+export const candidateStagingTagNames = (
+	refs: ReadonlyArray<MatchingRef>,
+	productionShorts: ReadonlySet<string>,
+): Array<string> => {
+	const out: Array<string> = []
 	for (const r of refs) {
-		const m = r.ref.match(TAG_RE)
-		if (m) out.add(m[1].slice(0, 7))
+		if (!r.ref.startsWith(`${TAG_PREFIX}dashdoc-`)) continue
+		if (productionShorts.has(shortSha(r.object.sha))) continue
+		out.push(r.ref.slice(TAG_PREFIX.length))
 	}
 	return out
 }
@@ -54,6 +60,7 @@ const buildRow = (
 		author: pr.author?.login ?? "unknown",
 		state: pr.state === "MERGED" ? "closed" : (pr.state.toLowerCase() as "open" | "closed"),
 		merged: pr.merged,
+		is_draft: pr.isDraft,
 		merge_sha: mergeSha,
 		head_sha: headSha,
 		created_at: pr.createdAt,
@@ -89,8 +96,20 @@ export const runSync = Effect.gen(function* () {
 	// show up anywhere on the board.
 	const prs = allPrs.filter((pr) => !(pr.state === "CLOSED" && !pr.merged))
 
-	const stagingShorts = parseStagingShorts(tags)
 	const productionShorts = toShort7Set(gitbookShas)
+
+	// Staging = commits reachable from a dashdoc-* tag that is strictly ahead
+	// of gitbook. Union the commit lists of each such candidate tag; set
+	// membership then answers "is this PR's merge sha on a pending staging
+	// release?". Deployed tags (sha already in gitbook) are filtered out.
+	const stagingTagNames = candidateStagingTagNames(tags, productionShorts)
+	const stagingCommitLists = yield* Effect.forEach(
+		stagingTagNames,
+		(ref) => gh.commitsAheadOfGitbook(ref).pipe(Effect.catchAll(() => Effect.succeed([]))),
+		{ concurrency: 4 },
+	)
+	const stagingShorts = new Set<string>()
+	for (const list of stagingCommitLists) for (const sha of list) stagingShorts.add(shortSha(sha))
 
 	// Phase 1: classify each PR using only the in-memory Set. Collect merged
 	// PRs whose merge sha was NOT found so we can verify them via the
@@ -132,7 +151,8 @@ export const runSync = Effect.gen(function* () {
 
 	return {
 		synced: rows.length,
-		staging_tags: stagingShorts.size,
+		staging_tag_candidates: stagingTagNames.length,
+		staging_commits: stagingShorts.size,
 		prod_commits: productionShorts.size,
 		fallback_promotions: fallbackResults.filter((r) => r.inProd).length,
 		fallback_checks: fallbackResults.length,

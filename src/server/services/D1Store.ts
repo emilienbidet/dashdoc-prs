@@ -17,6 +17,7 @@ type Row = {
 	author: string
 	state: string
 	merged: number
+	is_draft: number
 	merge_sha: string | null
 	head_sha: string
 	created_at: string
@@ -34,6 +35,7 @@ const toBoardRow = (r: Row): BoardRow => ({
 	author: r.author,
 	state: r.state as BoardRow["state"],
 	merged: r.merged === 1,
+	is_draft: r.is_draft === 1,
 	merge_sha: r.merge_sha,
 	head_sha: r.head_sha,
 	created_at: r.created_at,
@@ -50,16 +52,17 @@ export class D1Store extends Effect.Service<D1Store>()("D1Store", {
 		const db = env.DB
 
 		const upsertStmt = db.prepare(
-			`INSERT INTO prs (number,title,url,author,state,merged,merge_sha,head_sha,
+			`INSERT INTO prs (number,title,url,author,state,merged,is_draft,merge_sha,head_sha,
 				created_at,updated_at,merged_at,review_state,ci_state,column_key,raw_json)
-			 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 			 ON CONFLICT(number) DO UPDATE SET
 				title=excluded.title, url=excluded.url, author=excluded.author,
-				state=excluded.state, merged=excluded.merged, merge_sha=excluded.merge_sha,
-				head_sha=excluded.head_sha, created_at=excluded.created_at,
-				updated_at=excluded.updated_at, merged_at=excluded.merged_at,
-				review_state=excluded.review_state, ci_state=excluded.ci_state,
-				column_key=excluded.column_key, raw_json=excluded.raw_json`,
+				state=excluded.state, merged=excluded.merged, is_draft=excluded.is_draft,
+				merge_sha=excluded.merge_sha, head_sha=excluded.head_sha,
+				created_at=excluded.created_at, updated_at=excluded.updated_at,
+				merged_at=excluded.merged_at, review_state=excluded.review_state,
+				ci_state=excluded.ci_state, column_key=excluded.column_key,
+				raw_json=excluded.raw_json`,
 		)
 
 		return {
@@ -74,6 +77,7 @@ export class D1Store extends Effect.Service<D1Store>()("D1Store", {
 								r.author,
 								r.state,
 								r.merged ? 1 : 0,
+								r.is_draft ? 1 : 0,
 								r.merge_sha,
 								r.head_sha,
 								r.created_at,
@@ -91,7 +95,7 @@ export class D1Store extends Effect.Service<D1Store>()("D1Store", {
 			listPrs: tryD1("listPrs", async () => {
 				const res = await db
 					.prepare(
-						`SELECT number,title,url,author,state,merged,merge_sha,head_sha,
+						`SELECT number,title,url,author,state,merged,is_draft,merge_sha,head_sha,
 							created_at,updated_at,merged_at,review_state,ci_state,column_key
 						 FROM prs ORDER BY column_key, updated_at DESC`,
 					)
