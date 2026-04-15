@@ -37,7 +37,7 @@ export function KanbanColumn({
 				{rows.length === 0 ? (
 					<p className="px-1 text-xs text-slate-400 dark:text-slate-600">—</p>
 				) : (
-					rows.map((row) => <PrCard key={row.number} row={row} />)
+					rows.map((row) => <PrCard key={row.number} row={row} column={columnKey} />)
 				)}
 			</div>
 		</section>

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest"
-import { formatRelative, shortSha, twoWeeksAgoDate, twoWeeksAgoISO } from "./time.ts"
+import { formatRelative, shortSha, sinceDate, sinceISO } from "./time.ts"
 
 describe("time", () => {
-	it("twoWeeksAgoISO returns 14 days before now", () => {
+	it("sinceISO returns 7 days before now", () => {
 		const now = new Date("2026-04-15T12:00:00Z").getTime()
-		expect(twoWeeksAgoISO(now)).toBe("2026-04-01T12:00:00.000Z")
+		expect(sinceISO(now)).toBe("2026-04-08T12:00:00.000Z")
 	})
 
-	it("twoWeeksAgoDate returns YYYY-MM-DD form", () => {
+	it("sinceDate returns YYYY-MM-DD form", () => {
 		const now = new Date("2026-04-15T12:00:00Z").getTime()
-		expect(twoWeeksAgoDate(now)).toBe("2026-04-01")
+		expect(sinceDate(now)).toBe("2026-04-08")
 	})
 
 	it("shortSha returns first 7 chars", () => {

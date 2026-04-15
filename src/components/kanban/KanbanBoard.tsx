@@ -38,7 +38,7 @@ export function KanbanBoard() {
 function BoardGrid({ data, stale = false }: { data: BoardData; stale?: boolean }) {
 	return (
 		<div
-			className={`grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 ${
+			className={`grid h-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 ${
 				stale ? "opacity-80" : ""
 			}`}
 			aria-busy={stale || undefined}
@@ -52,7 +52,7 @@ function BoardGrid({ data, stale = false }: { data: BoardData; stale?: boolean }
 
 function BoardSkeleton() {
 	return (
-		<div className="grid h-[calc(100vh-8rem)] grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+		<div className="grid h-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
 			{COLUMNS.map((key) => (
 				<div
 					key={key}

@@ -121,6 +121,24 @@ export class D1Store extends Effect.Service<D1Store>()("D1Store", {
 						.run(),
 				),
 
+			// Delete every row whose PR number is not in `keep`. Lets us mirror
+			// the latest sync result exactly — closed-abandoned PRs and rows
+			// that fell out of the window disappear without needing separate
+			// prune rules.
+			pruneNotIn: (keep: ReadonlyArray<number>) =>
+				tryD1("pruneNotIn", async () => {
+					if (keep.length === 0) {
+						const r = await db.prepare(`DELETE FROM prs`).run()
+						return r.meta.changes ?? 0
+					}
+					const placeholders = keep.map(() => "?").join(",")
+					const r = await db
+						.prepare(`DELETE FROM prs WHERE number NOT IN (${placeholders})`)
+						.bind(...keep)
+						.run()
+					return r.meta.changes ?? 0
+				}),
+
 			getMeta: (key: string) =>
 				tryD1("getMeta", () =>
 					db

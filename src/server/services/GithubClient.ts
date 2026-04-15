@@ -1,9 +1,6 @@
 import { Data, Duration, Effect, Option, Schedule, Schema } from "effect"
 import { Env } from "../env.ts"
-import { CheckRunsResponse } from "../schemas/CheckRun.ts"
 import { CommitShas } from "../schemas/Commit.ts"
-import { Pr, SearchIssuesResult } from "../schemas/Pr.ts"
-import { Reviews } from "../schemas/Review.ts"
 import { MatchingRefs } from "../schemas/Tag.ts"
 import { EtagCache, type EtagCacheShape } from "./EtagCache.ts"
 
@@ -71,6 +68,12 @@ const getJson = <A, I>(deps: Deps, schema: Schema.Schema<A, I>, path: string) =>
 		Effect.mapError((e) => (e instanceof GithubError ? e : new GithubError({ path, cause: e }))),
 	)
 
+const CompareResult = Schema.Struct({
+	status: Schema.Literal("ahead", "behind", "identical", "diverged"),
+	ahead_by: Schema.Number,
+	behind_by: Schema.Number,
+})
+
 export class GithubClient extends Effect.Service<GithubClient>()("GithubClient", {
 	effect: Effect.gen(function* () {
 		const env = yield* Env
@@ -79,41 +82,14 @@ export class GithubClient extends Effect.Service<GithubClient>()("GithubClient",
 		const repo = env.GITHUB_REPO
 
 		return {
-			searchUserPrs: (since: string) => {
-				const q = encodeURIComponent(
-					`repo:${repo} author:${env.GITHUB_USER} is:pr updated:>=${since}`,
-				)
-				return getJson(
-					deps,
-					SearchIssuesResult,
-					`/search/issues?q=${q}&per_page=100&advanced_search=true`,
-				)
-			},
-
-			searchUserPrNumbers: (since: string) => {
-				const q = encodeURIComponent(
-					`repo:${repo} author:${env.GITHUB_USER} is:pr updated:>=${since}`,
-				)
-				return getJson(
-					deps,
-					SearchIssuesResult,
-					`/search/issues?q=${q}&per_page=100&advanced_search=true`,
-				).pipe(Effect.map((r) => r.items.map((i) => i.number)))
-			},
-
-			getPr: (number: number) => getJson(deps, Pr, `/repos/${repo}/pulls/${number}`),
-
-			listReviews: (number: number) =>
-				getJson(deps, Reviews, `/repos/${repo}/pulls/${number}/reviews?per_page=100`),
-
-			listCheckRuns: (sha: string) =>
-				getJson(deps, CheckRunsResponse, `/repos/${repo}/commits/${sha}/check-runs?per_page=100`),
-
 			listTags: (prefix: string) =>
 				getJson(deps, MatchingRefs, `/repos/${repo}/git/matching-refs/tags/${prefix}`),
 
-			listBranchCommits: (branch: string, perPage = 500) => {
-				const pages = Math.min(5, Math.ceil(perPage / 100))
+			// GitHub returns at most 100 commits per page. `max` is the depth we
+			// want to cover. Older pages are append-only so they 304 under
+			// ETag caching once warm.
+			listBranchCommits: (branch: string, max = 2000) => {
+				const pages = Math.max(1, Math.ceil(max / 100))
 				return Effect.forEach(
 					Array.from({ length: pages }, (_, i) => i + 1),
 					(page) =>
@@ -122,9 +98,20 @@ export class GithubClient extends Effect.Service<GithubClient>()("GithubClient",
 							CommitShas,
 							`/repos/${repo}/commits?sha=${branch}&per_page=100&page=${page}`,
 						),
-					{ concurrency: 2 },
+					{ concurrency: 4 },
 				).pipe(Effect.map((chunks) => chunks.flat().map((c) => c.sha)))
 			},
+
+			// Definitive ancestry test: `status` is `identical` or `behind` with
+			// ahead_by=0 iff `sha` is an ancestor of (or equal to) gitbook HEAD.
+			// Expensive (single call per query) so PrSync only falls back to
+			// this for merged PRs not found in the listBranchCommits Set.
+			isAncestorOfGitbook: (sha: string) =>
+				getJson(deps, CompareResult, `/repos/${repo}/compare/gitbook...${sha}`).pipe(
+					Effect.map(
+						(r) => (r.status === "identical" || r.status === "behind") && r.ahead_by === 0,
+					),
+				),
 		}
 	}),
 }) {}

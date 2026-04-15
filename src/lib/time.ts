@@ -1,8 +1,9 @@
-export const twoWeeksAgoISO = (now: number = Date.now()): string =>
-	new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString()
+const WINDOW_DAYS = 7
 
-export const twoWeeksAgoDate = (now: number = Date.now()): string =>
-	twoWeeksAgoISO(now).slice(0, 10)
+export const sinceISO = (now: number = Date.now()): string =>
+	new Date(now - WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString()
+
+export const sinceDate = (now: number = Date.now()): string => sinceISO(now).slice(0, 10)
 
 export const shortSha = (sha: string): string => sha.slice(0, 7)
 
