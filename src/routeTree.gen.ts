@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiSyncRouteImport } from './routes/api/sync'
+import { Route as ApiPrsRouteImport } from './routes/api/prs'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
@@ -22,31 +24,49 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSyncRoute = ApiSyncRouteImport.update({
+  id: '/api/sync',
+  path: '/api/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPrsRoute = ApiPrsRouteImport.update({
+  id: '/api/prs',
+  path: '/api/prs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/api/prs': typeof ApiPrsRoute
+  '/api/sync': typeof ApiSyncRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/api/prs': typeof ApiPrsRoute
+  '/api/sync': typeof ApiSyncRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/api/prs': typeof ApiPrsRoute
+  '/api/sync': typeof ApiSyncRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths: '/' | '/about' | '/api/prs' | '/api/sync'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to: '/' | '/about' | '/api/prs' | '/api/sync'
+  id: '__root__' | '/' | '/about' | '/api/prs' | '/api/sync'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ApiPrsRoute: typeof ApiPrsRoute
+  ApiSyncRoute: typeof ApiSyncRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sync': {
+      id: '/api/sync'
+      path: '/api/sync'
+      fullPath: '/api/sync'
+      preLoaderRoute: typeof ApiSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/prs': {
+      id: '/api/prs'
+      path: '/api/prs'
+      fullPath: '/api/prs'
+      preLoaderRoute: typeof ApiPrsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ApiPrsRoute: ApiPrsRoute,
+  ApiSyncRoute: ApiSyncRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
