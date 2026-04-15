@@ -16,8 +16,8 @@
 - ✅ Client atoms. `atoms/runtime.ts` wraps `Atom.runtime(Layer.empty)` as a seam for future client services. `atoms/prs.ts` is a polling atom — `Stream.make(undefined)` prepended to `Stream.fromSchedule(Schedule.spaced("5 seconds"))` so the first fetch fires immediately, not 5 s into the mount. `atoms/sync.ts` is `runtime.fn(() => fetch('/api/sync', POST))` — fire-and-forget; the server awaits the sync so the Worker stays alive.
 - ✅ Kanban UI. `ReviewBadge` + `CiBadge` (color via Tailwind palette only — emerald/rose/amber/slate), `RelativeTime` (self-ticks every 30 s), `PrCard` (title, #number, badges, relative time, deep link to the GitHub PR), `KanbanColumn` (sticky accented header, count pill, empty state), `KanbanBoard` (4-col grid, drives `Result.match` over `boardAtom`, fires `kickSyncAtom` on mount + visibility change).
 - ✅ `/board` route renders the real board. `/` → `/board`. SSR disabled on the board (client-only — atoms use `fetch`).
-- ⏳ Pending — `routes/board.tsx` + header link update
-- ⏳ Pending — Verification (D1 create, migrate, secret, dev test, deploy)
+- ✅ Dev verification via Chrome DevTools MCP. `/board` rendered end-to-end: 4 columns populated (Dev 33 / Merged 4 / Staging 3 / Production 55), accents correct, review + CI badges in place, relative times sensible, card links open GitHub PRs, zero console errors.
+- ⏳ Pending — Deploy (`wrangler deploy`) + confirm scheduled cron fires on `wrangler tail`.
 
 ## Frontend requirements
 
