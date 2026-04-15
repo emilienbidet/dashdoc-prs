@@ -9,7 +9,7 @@
 - 🔀 **Plan refinement — production signal**: the promote workflow force-pushes to the `gitbook` branch on prod-eu success (`promote-dashdoc.yml:427-428`). So the production check is *"PR's `merge_commit_sha` is in the ancestry of `gitbook`"* — cheaper than inspecting workflow inputs (which GitHub REST doesn't expose). Implemented as `listBranchCommits("gitbook", 500)` → `Set<sha>` membership.
 - ✅ `server/services/D1Store.ts` — `upsertPrs` (batched), `listPrs` (grouped by column, already sorted), `pruneBeyondWindow`, `getMeta`/`putMeta`. Also `server/schemas/BoardRow.ts` (the canonical shape shared between server and client).
 - ✅ Pure-logic lib: `column.ts` (dev/merged/staging/production resolution), `reviewState.ts` (latest-per-reviewer, CHANGES_REQUESTED > APPROVED > pending), `ciState.ts` (error > running > success > none — error outranks running so a red check is never masked), `time.ts` (`twoWeeksAgoISO/Date`, `shortSha`, `formatRelative`). 19 unit tests all green.
-- ⏳ Pending — `server/services/PrSync.ts`
+- ✅ `server/services/PrSync.ts` — `runSync` orchestrator: search → fetch detail+reviews+checks per PR (concurrency 5) → fetch tags + gitbook commits in parallel → compute review/ci/column → batch upsert → prune → write `last_sync_iso`. Returns `{ synced, staging_tags, prod_commits }` for log visibility. Staging is matched by parsing tag name (accepts `dashdoc-<sha>`, `-skip-observing`, `-cancel-promotion` suffixes); production by short7 membership in gitbook ancestry.
 - ⏳ Pending — `src/worker-entry.ts` (scheduled handler)
 - ⏳ Pending — API routes `routes/api/prs.ts` + `routes/api/sync.ts`
 - ⏳ Pending — `atoms/runtime.ts` + `atoms/prs.ts` + `atoms/sync.ts`

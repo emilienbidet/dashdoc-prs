@@ -22,6 +22,8 @@ export const Pr = Schema.Struct({
 export type Pr = typeof Pr.Type
 
 export const SearchIssuesResult = Schema.Struct({
+	total_count: Schema.Number,
+	incomplete_results: Schema.optional(Schema.Boolean),
 	items: Schema.Array(
 		Schema.Struct({
 			number: Schema.Number,

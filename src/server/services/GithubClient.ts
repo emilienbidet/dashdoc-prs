@@ -58,6 +58,17 @@ export class GithubClient extends Effect.Service<GithubClient>()("GithubClient",
 		const repo = env.GITHUB_REPO
 
 		return {
+			searchUserPrs: (since: string) => {
+				const q = encodeURIComponent(
+					`repo:${repo} author:${env.GITHUB_USER} is:pr updated:>=${since}`,
+				)
+				return getJson(
+					env,
+					SearchIssuesResult,
+					`/search/issues?q=${q}&per_page=100&advanced_search=true`,
+				)
+			},
+
 			searchUserPrNumbers: (since: string) => {
 				const q = encodeURIComponent(
 					`repo:${repo} author:${env.GITHUB_USER} is:pr updated:>=${since}`,
