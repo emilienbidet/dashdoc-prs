@@ -1,21 +1,26 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
-  "compatibility_date": "2025-09-02",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "src/worker-entry.ts",
-  "vars": {
-    "GITHUB_REPO": "dashdoc/dashdoc",
-    "GITHUB_USER": "emilienbidet"
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "dashdoc-prs",
-      "database_id": "REPLACE_WITH_D1_ID"
-    }
-  ],
-  "triggers": {
-    "crons": ["*/1 * * * *"]
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tanstack-start-app",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"main": "src/worker-entry.ts",
+	"vars": {
+		"GITHUB_REPO": "dashdoc/dashdoc",
+		"GITHUB_USER": "emilienbidet"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "dashdoc-prs",
+			"database_id": "95f4463d-9705-4b35-851c-92c4562b783f",
+			"remote": true
+		}
+	],
+	"triggers": {
+		"crons": [
+			"*/1 * * * *"
+		]
+	}
 }
