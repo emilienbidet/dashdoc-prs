@@ -9,7 +9,11 @@ export interface AppEnv {
 
 export class Env extends Context.Tag("AppEnv")<Env, AppEnv>() {}
 
-export const fromBindings = (bindings: Cloudflare.Env & { GITHUB_TOKEN?: string }): AppEnv => {
+// Secrets are not declared in wrangler.jsonc so wrangler types does not
+// generate them. We layer GITHUB_TOKEN on top of the generated Cloudflare.Env.
+export type AppBindings = Cloudflare.Env & { readonly GITHUB_TOKEN: string }
+
+export const fromBindings = (bindings: AppBindings): AppEnv => {
 	if (!bindings.GITHUB_TOKEN) {
 		throw new Error("GITHUB_TOKEN secret is not set. Run: bunx wrangler secret put GITHUB_TOKEN")
 	}
