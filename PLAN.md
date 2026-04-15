@@ -8,7 +8,7 @@
 - ✅ Schemas (`Pr`, `Review`, `CheckRun`, `Tag`, `Commit`) + `GithubClient` service (search, getPr, reviews, check-runs, matching-refs, branch commits). Uses `effect/Schema` (`@effect/schema` removed — it's now in `effect` core). Retry on 429/5xx with exponential backoff. ETag caching deferred to after `D1Store` lands.
 - 🔀 **Plan refinement — production signal**: the promote workflow force-pushes to the `gitbook` branch on prod-eu success (`promote-dashdoc.yml:427-428`). So the production check is *"PR's `merge_commit_sha` is in the ancestry of `gitbook`"* — cheaper than inspecting workflow inputs (which GitHub REST doesn't expose). Implemented as `listBranchCommits("gitbook", 500)` → `Set<sha>` membership.
 - ✅ `server/services/D1Store.ts` — `upsertPrs` (batched), `listPrs` (grouped by column, already sorted), `pruneBeyondWindow`, `getMeta`/`putMeta`. Also `server/schemas/BoardRow.ts` (the canonical shape shared between server and client).
-- ⏳ Pending — `lib/column.ts` + `lib/reviewState.ts` + `lib/ciState.ts` + `lib/time.ts`
+- ✅ Pure-logic lib: `column.ts` (dev/merged/staging/production resolution), `reviewState.ts` (latest-per-reviewer, CHANGES_REQUESTED > APPROVED > pending), `ciState.ts` (error > running > success > none — error outranks running so a red check is never masked), `time.ts` (`twoWeeksAgoISO/Date`, `shortSha`, `formatRelative`). 19 unit tests all green.
 - ⏳ Pending — `server/services/PrSync.ts`
 - ⏳ Pending — `src/worker-entry.ts` (scheduled handler)
 - ⏳ Pending — API routes `routes/api/prs.ts` + `routes/api/sync.ts`
