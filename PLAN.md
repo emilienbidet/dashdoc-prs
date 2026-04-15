@@ -14,7 +14,8 @@
 - ✅ ETag caching. Migration 0002 adds `etag_cache(key, etag, body, updated_at)`. `EtagCache` is a Context.Tag with two layers: `EtagCacheD1` (production, best-effort — cache errors degrade to no-cache rather than failing the request) and `EtagCacheNoop` (used in tests). `GithubClient.getJson` now sends `If-None-Match`, replays cached bodies on 304, and stores fresh `ETag` headers on 200. 304 responses don't count against the primary rate limit, which brings the steady-state sync well under the 5k/hr ceiling once the cache warms.
 - ✅ API routes `/api/prs` (GET — reads D1, returns BoardData grouped+sorted) and `/api/sync` (POST — awaits full sync, returns 204). Verified live against dev server: real PRs came back with correct review/ci/column fields.
 - ✅ Client atoms. `atoms/runtime.ts` wraps `Atom.runtime(Layer.empty)` as a seam for future client services. `atoms/prs.ts` is a polling atom — `Stream.make(undefined)` prepended to `Stream.fromSchedule(Schedule.spaced("5 seconds"))` so the first fetch fires immediately, not 5 s into the mount. `atoms/sync.ts` is `runtime.fn(() => fetch('/api/sync', POST))` — fire-and-forget; the server awaits the sync so the Worker stays alive.
-- ⏳ Pending — Kanban components (`KanbanBoard`, `KanbanColumn`, `PrCard`, `ReviewBadge`, `CiBadge`, `RelativeTime`)
+- ✅ Kanban UI. `ReviewBadge` + `CiBadge` (color via Tailwind palette only — emerald/rose/amber/slate), `RelativeTime` (self-ticks every 30 s), `PrCard` (title, #number, badges, relative time, deep link to the GitHub PR), `KanbanColumn` (sticky accented header, count pill, empty state), `KanbanBoard` (4-col grid, drives `Result.match` over `boardAtom`, fires `kickSyncAtom` on mount + visibility change).
+- ✅ `/board` route renders the real board. `/` → `/board`. SSR disabled on the board (client-only — atoms use `fetch`).
 - ⏳ Pending — `routes/board.tsx` + header link update
 - ⏳ Pending — Verification (D1 create, migrate, secret, dev test, deploy)
 
